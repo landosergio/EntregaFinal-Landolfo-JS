@@ -1,3 +1,30 @@
+//        -- CLASES --
+
+class Producto {
+  constructor(nombre, precio) {
+    this.nombre = nombre;
+    this.precio = precio;
+  }
+}
+
+class Cliente {
+  constructor() {
+    this.carrito = [];
+    this.total = 0;
+  }
+
+  anadirProducto(prod) {
+    this.carrito.push(prod);
+    this.total += prod.precio;
+  }
+
+  quitarProducto(prod) {
+    this.total -= prod.precio;
+    let pos = this.carrito.indexOf(prod);
+    this.carrito.splice(pos, 1);
+  }
+}
+
 //        -- FUNCIONES --
 
 // PRODUCTO
@@ -102,6 +129,8 @@ function mensajeTotal(total, cuotas) {
 // Bloque Principal
 
 let accion = 1;
+
+const cliente = new Cliente();
 
 while (accion != 0) {
   let idProd = comprobarProducto();
