@@ -16,24 +16,43 @@ class Cliente {
   anadirProducto(prod) {
     this.carrito.push(prod);
     this.total += prod.precio;
-    alert("Agregaste al carrito " + prod.nombre);
+    alert("Agregaste al carrito " + prod.nombre + ".");
   }
 
-  quitarProducto(prod) {
-    this.total -= prod.precio;
-    let pos = this.carrito.indexOf(prod);
-    this.carrito.splice(pos, 1);
+  quitarProducto() {
+    let carritoNombres = this.formatearCarrito();
+
+    let pos = parseInt(
+      prompt(
+        "Ingresá el número del producto que quieras eliminar:\n\n" +
+          carritoNombres.join("") +
+          "\nTotal: $" +
+          this.total
+      ) - 1
+    );
+
+    if (pos >= 0 && pos <= carritoNombres.length - 1) {
+      this.total -= this.carrito[pos].precio;
+      alert("Eliminaste " + carritoNombres[pos]);
+      this.carrito.splice(pos, 1);
+    } else {
+      alert("El producto no existe.");
+    }
   }
 
-  verCarrito() {
+  formatearCarrito() {
     let i = 0;
     let carritoNombres = this.carrito.map((prod) => {
       i++;
       return `${i} - ${prod.nombre}\n`;
     });
+    return carritoNombres;
+  }
 
+  verCarrito() {
+    let carritoNombres = this.formatearCarrito();
     alert(
-      "Productos:\n\n" + carritoNombres.join("") + "\n\n\nTotal: $" + this.total
+      "Productos:\n\n" + carritoNombres.join("") + "\nTotal: $" + this.total
     );
   }
 
@@ -47,12 +66,10 @@ class Cliente {
 
     while (id < 1 || id >= 5 || isNaN(id)) {
       if (id == 0) {
-        alert(
-          "¿Estás seguro? Realmente te recomendamos comprar algo. Intentemos de nuevo"
-        );
+        break;
       }
       if (id != 0) {
-        alert("El producto no existe");
+        alert("El producto no existe.");
       }
 
       id = seleccionarProducto();
@@ -138,7 +155,6 @@ const cliente = new Cliente();
 let control = 1;
 let idProd;
 let producto;
-let accion;
 
 while (control != 0) {
   control = parseInt(
@@ -150,14 +166,28 @@ while (control != 0) {
   switch (control) {
     case 1: {
       idProd = cliente.comprobarProducto() - 1;
-      producto = productos[idProd];
-      cliente.anadirProducto(producto);
+      if (idProd != -1) {
+        producto = productos[idProd];
+        cliente.anadirProducto(producto);
+      }
       break;
     }
     case 2: {
+      if (cliente.carrito.length != 0) {
+        cliente.quitarProducto();
+      } else {
+        alert("El carrito está vacío.");
+      }
+      break;
     }
     case 3: {
-      cliente.verCarrito();
+      if (cliente.carrito.length != 0) {
+        cliente.verCarrito();
+      } else {
+        alert("El carrito está vacío.");
+      }
+
+      break;
     }
     case 4: {
       break;
