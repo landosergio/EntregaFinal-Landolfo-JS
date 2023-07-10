@@ -1,4 +1,4 @@
-//        -- CLASES --
+//          -- CLASES --
 
 class Producto {
   constructor(nombre, precio) {
@@ -20,75 +20,76 @@ class Cliente {
   }
 
   quitarProducto() {
-    let carritoNombres = this.formatearCarrito();
+    let carritoTabla = formatearProductos(this.carrito);
 
     let pos = parseInt(
       prompt(
         "Ingresá el número del producto que quieras eliminar:\n\n" +
-          carritoNombres.join("") +
+          carritoTabla.join("") +
           "\nTotal: $" +
           this.total
       ) - 1
     );
 
-    if (pos >= 0 && pos <= carritoNombres.length - 1) {
+    if (pos >= 0 && pos <= carritoTabla.length - 1) {
       this.total -= this.carrito[pos].precio;
-      alert("Eliminaste " + carritoNombres[pos]);
+      alert("Eliminaste " + this.carrito[pos].nombre);
       this.carrito.splice(pos, 1);
     } else {
       alert("El producto no existe.");
     }
   }
 
-  formatearCarrito() {
-    let i = 0;
-    let carritoNombres = this.carrito.map((prod) => {
-      i++;
-      return `${i} - ${prod.nombre}\n`;
-    });
-    return carritoNombres;
-  }
-
   verCarrito() {
-    let carritoNombres = this.formatearCarrito();
-    alert(
-      "Productos:\n\n" + carritoNombres.join("") + "\nTotal: $" + this.total
-    );
+    let carritoTabla = formatearProductos(this.carrito);
+    alert("Productos:\n\n" + carritoTabla.join("") + "\nTotal: $" + this.total);
   }
 
   vaciarCarrito() {
     this.carrito = [];
     this.total = 0;
-  }
-
-  comprobarProducto() {
-    let id = seleccionarProducto();
-
-    while (id < 1 || id >= 5 || isNaN(id)) {
-      if (id == 0) {
-        break;
-      }
-      if (id != 0) {
-        alert("El producto no existe.");
-      }
-
-      id = seleccionarProducto();
-    }
-    return id;
+    alert("Se vació el carrito.");
   }
 }
 
 //
 //
-//        -- FUNCIONES --
 
-// PRODUCTO
-function seleccionarProducto() {
+//          --- FUNCIONES ---
+
+function mostrarProductos(productos) {
+  let productosTabla = formatearProductos(productos);
   return parseInt(
     prompt(
-      'Ingresá el número para seleccionar un producto: \n\n1 - TV Samsung 50" \n2 - Zapatillas Nike \n3 - Guitarra Eléctrica Fender \n4 - Cocina Whirlpool'
+      `Ingresá un número para seleccionar el producto o "0" para volver al menú principal: \n\n` +
+        productosTabla.join("")
     )
   );
+}
+
+function formatearProductos(productos) {
+  let i = 0;
+  let productosTabla = productos.map((prod) => {
+    i++;
+    return `${i} - ${prod.nombre} ------------ $${prod.precio}\n`;
+  });
+  return productosTabla;
+}
+
+function comprobarProducto(productos) {
+  let id = mostrarProductos(productos);
+
+  while (id < 1 || id > productos.length || isNaN(id)) {
+    if (id == 0) {
+      break;
+    }
+    if (id != 0) {
+      alert("El producto no existe.");
+    }
+
+    id = mostrarProductos(productos);
+  }
+  return id;
 }
 
 // CUOTAS
@@ -141,7 +142,9 @@ function mensajeTotal(total, cuotas) {
 }
 */
 
-// Bloque Principal
+//          --- BLOQUE PRINCIPAL---
+
+// Productos
 
 const tvSamsung = new Producto('TV Samsung 50"', 210000);
 const zapaNike = new Producto("Zapatillas Nike", 65000);
@@ -159,13 +162,13 @@ let producto;
 while (control != 0) {
   control = parseInt(
     prompt(
-      "¡Bienvenido! Elegí una opción: \n\n1 - Comprar un producto \n2 - Eliminar un producto \n3 - Ver Carrito \n4 - Pagar \n5 - Salir"
+      "¡Bienvenido! Elegí una opción: \n\n1 - Comprar un producto \n2 - Eliminar un producto \n3 - Ver Carrito \n4 - Vaciar Carrito \n5 - Pagar \n6 - Salir"
     )
   );
 
   switch (control) {
     case 1: {
-      idProd = cliente.comprobarProducto() - 1;
+      idProd = comprobarProducto(productos) - 1;
       if (idProd != -1) {
         producto = productos[idProd];
         cliente.anadirProducto(producto);
@@ -190,9 +193,13 @@ while (control != 0) {
       break;
     }
     case 4: {
+      cliente.vaciarCarrito();
       break;
     }
     case 5: {
+      break;
+    }
+    case 6: {
       control = 0;
       break;
     }
