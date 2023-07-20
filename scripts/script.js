@@ -200,7 +200,12 @@ function mostrarMasProd(stock, prodMostrados, seccionProductos) {
   let nuevosProd = obtenerNuevosProd(stock, prodMostrados.length);
 
   prodMostrados = prodMostrados.concat(nuevosProd);
-  cargarHTML(prodMostrados, seccionProductos);
+  cargarHTML(nuevosProd, seccionProductos);
+mostrarCantProductos(prodMostrados, stock, seccionProductos)
+
+  
+  
+
   return prodMostrados;
 }
 
@@ -210,25 +215,50 @@ function obtenerNuevosProd(stock, ultimoProd) {
   return productos;
 }
 
-function cargarHTML(prodMostrados, seccionProductos) {
-  for (let producto of prodMostrados) {
+function cargarHTML(nuevosProd, seccionProductos) {
+let fila = document.createElement("div");
+fila.className = ("row d-flex justify-content-around")
+
+
+  for (let producto of nuevosProd) {
     let tarjetaProd = crearTarjeta(producto);
-    seccionProductos.append(tarjetaProd);
+    fila.appendChild(tarjetaProd);
   }
+
+  seccionProductos.appendChild(fila);
+
 }
 
 function crearTarjeta(producto) {
   let tarjetaProd = document.createElement("div");
-  tarjetaProd.innerHTML = `<div class="card" style="width: 12rem;">
+  tarjetaProd.className = ("card");
+  tarjetaProd.style = "width: 12rem;"
+  
+  tarjetaProd.innerHTML = `
   <img src="${producto.rutaImg}" class="card-img-top" alt="${producto.nombre}">
   <div class="card-body">
     <h5 class="card-title">${producto.nombre}</h5>
     <p class="card-text">Completar descripción</p>
     <a href="#" class="btn btn-primary">Comprar</a>
-  </div>
-</div>`;
+  </div>`;
   return tarjetaProd;
 }
+
+
+function mostrarCantProductos (prodMostrados,stock,seccionProductos){
+  let mensajeViejo;
+  if (mensajeViejo = document.getElementById("mostrando")) {
+    mensajeViejo.remove();
+  }
+
+
+  let mensaje = document.createElement("p");
+  mensaje.id = ("mostrando")
+  mensaje.innerText = `Mostrando ${prodMostrados.length} de ${stock.length} productos.`
+  seccionProductos.appendChild(mensaje);
+}
+
+
 
 let botonMostrarMasProd = document.getElementById("botonMasProd");
 
