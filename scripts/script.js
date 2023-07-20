@@ -1,9 +1,10 @@
 //          -- CLASES --
 
 class Producto {
-  constructor(nombre, precio) {
+  constructor(nombre, precio, rutaImg) {
     this.nombre = nombre;
     this.precio = precio;
+    this.rutaImg = rutaImg;
   }
 }
 
@@ -55,42 +56,7 @@ class Cliente {
 //
 //
 
-//          --- FUNCIONES ---
-
-function mostrarProductos(productos) {
-  let productosTabla = formatearProductos(productos);
-  return parseInt(
-    prompt(
-      `Ingresá un número para seleccionar el producto o "0" para volver al menú principal: \n\n` +
-        productosTabla.join("")
-    )
-  );
-}
-
-function formatearProductos(productos) {
-  let i = 0;
-  let productosTabla = productos.map((prod) => {
-    i++;
-    return `${i} - ${prod.nombre} ------------ $${prod.precio}\n`;
-  });
-  return productosTabla;
-}
-
-function comprobarProducto(productos) {
-  let id = mostrarProductos(productos);
-
-  while (id < 1 || id > productos.length || isNaN(id)) {
-    if (id == 0) {
-      break;
-    }
-    if (id != 0) {
-      alert("El producto no existe.");
-    }
-
-    id = mostrarProductos(productos);
-  }
-  return id;
-}
+// FUNCIONES OPCIONAL
 
 // CUOTAS
 
@@ -144,64 +110,197 @@ function mensajeTotal(total, cuotas) {
 
 //          --- BLOQUE PRINCIPAL---
 
-// Productos
+// Productos y Cliente
 
-const tvSamsung = new Producto('TV Samsung 50"', 210000);
-const zapaNike = new Producto("Zapatillas Nike", 65000);
-const guitFender = new Producto("Guitarra Eléctrica Fender", 830000);
-const cocWhirlpool = new Producto("Cocina Whirlpool", 160000);
+const tvSamsung = new Producto(
+  'TV Samsung 50"',
+  210000,
+  "images/tv-samsung-50.png"
+);
+const notebookLenovo = new Producto(
+  "Notebook Lenovo",
+  260000,
+  "images/notebook-lenovo.jpeg"
+);
+const zapaNike = new Producto(
+  "Zapatillas Nike",
+  65000,
+  "images/zapa-nike.jpeg"
+);
+const remBlancaLisa = new Producto(
+  "Remera blanca lisa",
+  6000,
+  "images/rem-blanca-lisa.webp"
+);
+const remNegraLisa = new Producto(
+  "Remera negra lisa",
+  5200,
+  "images/rem-negra-lisa"
+);
+const botasMujer = new Producto(
+  "Botas mujer 47 Street",
+  22000,
+  "images/botas-mujer"
+);
+const guitFender = new Producto(
+  "Guitarra Eléctrica Fender",
+  830000,
+  "images/guit-fender.jpg"
+);
+const pianoDigital = new Producto(
+  "Piano digital Yamaha P-45",
+  357000,
+  "images/piano-digital"
+);
+const bateriaParquer = new Producto(
+  "Batería acústica Parquer",
+  290000,
+  "images/bateria-parquer"
+);
+const cocWhirlpool = new Producto(
+  "Cocina Whirlpool",
+  160000,
+  "images/coc-whirlpool"
+);
 
-const productos = [tvSamsung, zapaNike, guitFender, cocWhirlpool];
+const hornoElec = new Producto(
+  "Horno eléctrico Peabody",
+  45000,
+  "images/horno-elec"
+);
+
+const kitHerramientas = new Producto(
+  "Kit de herramientas Kroner",
+  28000,
+  "images/kit-herramientas"
+);
+
+const stock = [
+  tvSamsung,
+  notebookLenovo,
+  zapaNike,
+  remBlancaLisa,
+  remNegraLisa,
+  botasMujer,
+  guitFender,
+  pianoDigital,
+  bateriaParquer,
+  cocWhirlpool,
+  hornoElec,
+  kitHerramientas,
+];
 
 const cliente = new Cliente();
 
-let control = 1;
+//
+
+//          --- FUNCIONES ---
+
+function mostrarMasProd(stock, prodMostrados, seccionProductos) {
+  let nuevosProd = obtenerNuevosProd(stock, prodMostrados.length);
+
+  prodMostrados = prodMostrados.concat(nuevosProd);
+  cargarHTML(prodMostrados, seccionProductos);
+  return prodMostrados;
+}
+
+function obtenerNuevosProd(stock, ultimoProd) {
+  let productos = stock.slice(ultimoProd, ultimoProd + 4);
+
+  return productos;
+}
+
+function cargarHTML(prodMostrados, seccionProductos) {
+  for (let producto of prodMostrados) {
+    let tarjetaProd = crearTarjeta(producto);
+    seccionProductos.append(tarjetaProd);
+  }
+}
+
+function crearTarjeta(producto) {
+  let tarjetaProd = document.createElement("div");
+  tarjetaProd.innerHTML = `<div class="card" style="width: 12rem;">
+  <img src="${producto.rutaImg}" class="card-img-top" alt="${producto.nombre}">
+  <div class="card-body">
+    <h5 class="card-title">${producto.nombre}</h5>
+    <p class="card-text">Completar descripción</p>
+    <a href="#" class="btn btn-primary">Comprar</a>
+  </div>
+</div>`;
+  return tarjetaProd;
+}
+
+let botonMostrarMasProd = document.getElementById("botonMasProd");
+
+botonMostrarMasProd.onclick = () => {
+  prodMostrados = mostrarMasProd(stock, prodMostrados, seccionProductos);
+};
+//          --- BLOQUE PRINCIPAL ---
+
+// Inicializar Sección "Productos"
+
+let prodMostrados = [];
+
+let seccionProductos = document.querySelector(".productos");
+
+prodMostrados = mostrarMasProd(stock, prodMostrados, seccionProductos);
+
+console.log(prodMostrados);
+
+/*
+
+let control;
 let idProd;
 let producto;
 
-while (control != 0) {
-  control = parseInt(
-    prompt(
-      "¡Bienvenido! Elegí una opción: \n\n1 - Comprar un producto \n2 - Eliminar un producto \n3 - Ver Carrito \n4 - Vaciar Carrito \n5 - Pagar \n6 - Salir"
-    )
-  );
 
-  switch (control) {
-    case 1: {
-      idProd = comprobarProducto(productos) - 1;
-      if (idProd != -1) {
-        producto = productos[idProd];
-        cliente.anadirProducto(producto);
-      }
-      break;
-    }
-    case 2: {
-      if (cliente.carrito.length != 0) {
-        cliente.quitarProducto();
-      } else {
-        alert("El carrito está vacío.");
-      }
-      break;
-    }
-    case 3: {
-      if (cliente.carrito.length != 0) {
-        cliente.verCarrito();
-      } else {
-        alert("El carrito está vacío.");
-      }
 
-      break;
+control = parseInt(
+  prompt(
+    "¡Bienvenido! Elegí una opción: \n\n1 - Comprar un producto \n2 - Eliminar un producto \n3 - Ver Carrito \n4 - Vaciar Carrito \n5 - Pagar \n6 - Salir"
+  )
+);
+
+
+
+
+switch (control) {
+  case 1: {
+    idProd = comprobarProducto(productos) - 1;
+    if (idProd != -1) {
+      producto = productos[idProd];
+      cliente.anadirProducto(producto);
     }
-    case 4: {
-      cliente.vaciarCarrito();
-      break;
+    break;
+  }
+  case 2: {
+    if (cliente.carrito.length != 0) {
+      cliente.quitarProducto();
+    } else {
+      alert("El carrito está vacío.");
     }
-    case 5: {
-      break;
+    break;
+  }
+  case 3: {
+    if (cliente.carrito.length != 0) {
+      cliente.verCarrito();
+    } else {
+      alert("El carrito está vacío.");
     }
-    case 6: {
-      control = 0;
-      break;
-    }
+
+    break;
+  }
+  case 4: {
+    cliente.vaciarCarrito();
+    break;
+  }
+  case 5: {
+    break;
+  }
+  case 6: {
+    control = 0;
+    break;
   }
 }
+
+*/
