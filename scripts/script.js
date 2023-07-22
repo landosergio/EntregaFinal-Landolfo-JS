@@ -1,3 +1,7 @@
+//          -- MÓDULOS --
+
+
+
 //          -- CLASES --
 
 class Producto {
@@ -5,6 +9,7 @@ class Producto {
     this.nombre = nombre;
     this.precio = precio;
     this.rutaImg = rutaImg;
+    this.precioFormat = `$${Math.trunc(this.precio%1000000/100000)}${Math.trunc(this.precio%100000/10000)}${Math.trunc(this.precio%10000/1000)}.${Math.trunc(this.precio%1000/100)}${Math.trunc(this.precio%100/10)}${Math.trunc(this.precio%10)}`
   }
 }
 
@@ -144,7 +149,7 @@ const botasMujer = new Producto(
 );
 const guitFender = new Producto(
   "Guitarra Eléctrica Fender",
-  830000,
+  831234,
   "images/guit-fender.jpg"
 );
 const pianoDigital = new Producto(
@@ -197,6 +202,9 @@ const cliente = new Cliente();
 //          --- FUNCIONES ---
 
 function mostrarMasProd(stock, prodMostrados, seccionProductos) {
+
+  if (prodMostrados.length < stock.length) {
+
   let nuevosProd = obtenerNuevosProd(stock, prodMostrados.length);
 
   prodMostrados = prodMostrados.concat(nuevosProd);
@@ -204,6 +212,7 @@ function mostrarMasProd(stock, prodMostrados, seccionProductos) {
   mostrarCantProductos(prodMostrados, stock, seccionProductos);
 
   return prodMostrados;
+}
 }
 
 function obtenerNuevosProd(stock, ultimoProd) {
@@ -233,7 +242,7 @@ function crearTarjeta(producto) {
   <img src="${producto.rutaImg}" class="card-img-top" alt="${producto.nombre}">
   <div class="card-body">
     <h5 class="card-title">${producto.nombre}</h5>
-    <p class="card-text">Completar descripción</p>
+    <p class="card-text">${producto.precioFormat}</p>
     <a href="#" class="btn btn-primary">Comprar</a>
   </div>`;
   return tarjetaProd;
