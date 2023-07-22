@@ -201,10 +201,7 @@ function mostrarMasProd(stock, prodMostrados, seccionProductos) {
 
   prodMostrados = prodMostrados.concat(nuevosProd);
   cargarHTML(nuevosProd, seccionProductos);
-mostrarCantProductos(prodMostrados, stock, seccionProductos)
-
-  
-  
+  mostrarCantProductos(prodMostrados, stock, seccionProductos);
 
   return prodMostrados;
 }
@@ -216,9 +213,8 @@ function obtenerNuevosProd(stock, ultimoProd) {
 }
 
 function cargarHTML(nuevosProd, seccionProductos) {
-let fila = document.createElement("div");
-fila.className = ("row d-flex justify-content-around")
-
+  let fila = document.createElement("div");
+  fila.className = "d-flex justify-content-around my-4";
 
   for (let producto of nuevosProd) {
     let tarjetaProd = crearTarjeta(producto);
@@ -226,14 +222,13 @@ fila.className = ("row d-flex justify-content-around")
   }
 
   seccionProductos.appendChild(fila);
-
 }
 
 function crearTarjeta(producto) {
   let tarjetaProd = document.createElement("div");
-  tarjetaProd.className = ("card");
-  tarjetaProd.style = "width: 12rem;"
-  
+  tarjetaProd.className = "card";
+  tarjetaProd.style = "width: 12rem;";
+
   tarjetaProd.innerHTML = `
   <img src="${producto.rutaImg}" class="card-img-top" alt="${producto.nombre}">
   <div class="card-body">
@@ -244,21 +239,17 @@ function crearTarjeta(producto) {
   return tarjetaProd;
 }
 
-
-function mostrarCantProductos (prodMostrados,stock,seccionProductos){
+function mostrarCantProductos(prodMostrados, stock, seccionProductos) {
   let mensajeViejo;
-  if (mensajeViejo = document.getElementById("mostrando")) {
+  if ((mensajeViejo = document.getElementById("mostrando"))) {
     mensajeViejo.remove();
   }
 
-
   let mensaje = document.createElement("p");
-  mensaje.id = ("mostrando")
-  mensaje.innerText = `Mostrando ${prodMostrados.length} de ${stock.length} productos.`
+  mensaje.id = "mostrando";
+  mensaje.innerText = `Mostrando ${prodMostrados.length} de ${stock.length} productos.`;
   seccionProductos.appendChild(mensaje);
 }
-
-
 
 let botonMostrarMasProd = document.getElementById("botonMasProd");
 
