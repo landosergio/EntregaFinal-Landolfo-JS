@@ -1,7 +1,5 @@
 //          -- MÓDULOS --
 
-
-
 //          -- CLASES --
 
 class Producto {
@@ -9,7 +7,17 @@ class Producto {
     this.nombre = nombre;
     this.precio = precio;
     this.rutaImg = rutaImg;
-    this.precioFormat = `$${Math.trunc(this.precio%1000000/100000)}${Math.trunc(this.precio%100000/10000)}${Math.trunc(this.precio%10000/1000)}.${Math.trunc(this.precio%1000/100)}${Math.trunc(this.precio%100/10)}${Math.trunc(this.precio%10)}`
+    //-------------------------------------------------------------------------
+    this.precioFormat = `$${
+      Math.trunc((this.precio % 1000000) / 100000) || ""
+    }${
+      Math.trunc((this.precio % 1000000) / 100000)
+        ? Math.trunc((this.precio % 100000) / 10000)
+        : Math.trunc((this.precio % 100000) / 10000) || ""
+    }${Math.trunc((this.precio % 10000) / 1000)}.${Math.trunc(
+      (this.precio % 1000) / 100
+    )}${Math.trunc((this.precio % 100) / 10)}${Math.trunc(this.precio % 10)}`;
+    // precioFormat rompe si el precio es inferior a 1000 o superior a 999.999, pero es intencional por el momento 😁
   }
 }
 
@@ -20,9 +28,13 @@ class Cliente {
   }
 
   anadirProducto(prod) {
+    let seccionCarrito = document.getElementsByClassName("carrito")[0];
+
+    let tarjetaProd = crearTarjetaCarrito(prod);
+    seccionCarrito.appendChild(tarjetaProd);
+
     this.carrito.push(prod);
     this.total += prod.precio;
-    alert("Agregaste al carrito " + prod.nombre + ".");
   }
 
   quitarProducto() {
@@ -119,7 +131,7 @@ function mensajeTotal(total, cuotas) {
 
 const tvSamsung = new Producto(
   'TV Samsung 50"',
-  210000,
+  207000,
   "images/tv-samsung-50.png"
 );
 const notebookLenovo = new Producto(
@@ -149,7 +161,7 @@ const botasMujer = new Producto(
 );
 const guitFender = new Producto(
   "Guitarra Eléctrica Fender",
-  831234,
+  830000,
   "images/guit-fender.jpg"
 );
 const pianoDigital = new Producto(
@@ -202,17 +214,15 @@ const cliente = new Cliente();
 //          --- FUNCIONES ---
 
 function mostrarMasProd(stock, prodMostrados, seccionProductos) {
-
   if (prodMostrados.length < stock.length) {
+    let nuevosProd = obtenerNuevosProd(stock, prodMostrados.length);
 
-  let nuevosProd = obtenerNuevosProd(stock, prodMostrados.length);
+    prodMostrados = prodMostrados.concat(nuevosProd);
+    cargarHTML(nuevosProd, seccionProductos);
+    mostrarCantProductos(prodMostrados, stock, seccionProductos);
 
-  prodMostrados = prodMostrados.concat(nuevosProd);
-  cargarHTML(nuevosProd, seccionProductos);
-  mostrarCantProductos(prodMostrados, stock, seccionProductos);
-
-  return prodMostrados;
-}
+    return prodMostrados;
+  }
 }
 
 function obtenerNuevosProd(stock, ultimoProd) {
@@ -227,6 +237,10 @@ function cargarHTML(nuevosProd, seccionProductos) {
 
   for (let producto of nuevosProd) {
     let tarjetaProd = crearTarjeta(producto);
+    let botonCompra = tarjetaProd.childNodes[3].childNodes[5];
+    console.log(botonCompra);
+    botonCompra.onclick = () => cliente.anadirProducto(producto, tarjetaProd);
+
     fila.appendChild(tarjetaProd);
   }
 
@@ -245,6 +259,22 @@ function crearTarjeta(producto) {
     <p class="card-text">${producto.precioFormat}</p>
     <a href="#" class="btn btn-primary">Comprar</a>
   </div>`;
+
+  return tarjetaProd;
+}
+
+function crearTarjetaCarrito(producto) {
+  let tarjetaProd = document.createElement("div");
+  tarjetaProd.className = "card";
+  tarjetaProd.style = "width: 10rem;";
+
+  tarjetaProd.innerHTML = `
+ <img src="${producto.rutaImg}" class="card-img-top" alt="${producto.nombre}">
+ <div class="card-body">
+   <h5 class="card-title">${producto.nombre}</h5>
+   <p class="card-text">${producto.precioFormat}</p>
+ </div>`;
+
   return tarjetaProd;
 }
 
@@ -260,11 +290,19 @@ function mostrarCantProductos(prodMostrados, stock, seccionProductos) {
   seccionProductos.appendChild(mensaje);
 }
 
+function encontrarProducto(nombre, stock) {
+  let prodBuscado = stock.find((producto) => producto.nombre == nombre);
+  return prodBuscado;
+}
+
+//    Eventos
+
 let botonMostrarMasProd = document.getElementById("botonMasProd");
 
 botonMostrarMasProd.onclick = () => {
   prodMostrados = mostrarMasProd(stock, prodMostrados, seccionProductos);
 };
+
 //          --- BLOQUE PRINCIPAL ---
 
 // Inicializar Sección "Productos"
