@@ -139,13 +139,7 @@ class Cliente {
       botonDisminuir.className = "btn btn-primary mx-2";
       botonDisminuir.innerHTML = '<i class="bi bi-chevron-down"></i>';
       botonDisminuir.onclick = () =>
-        modificarProdCarrito(
-          "disminuir",
-          prodEnCarrito,
-          prodEnStock,
-          filaCarrito,
-          this
-        );
+        modificarProdCarrito("disminuir", prodEnCarrito, filaCarrito, this);
 
       let cantProd = document.createElement("span");
       cantProd.className = "px-2 py-1 border border-2";
@@ -156,13 +150,7 @@ class Cliente {
       botonAumentar.className = "btn btn-primary mx-2";
       botonAumentar.innerHTML = '<i class="bi bi-chevron-up"></i>';
       botonAumentar.onclick = () =>
-        modificarProdCarrito(
-          "aumentar",
-          prodEnCarrito,
-          prodEnStock,
-          filaCarrito,
-          this
-        );
+        modificarProdCarrito("aumentar", prodEnCarrito, filaCarrito, this);
 
       // Total por producto
 
@@ -191,13 +179,7 @@ class Cliente {
       let filaCarrito = document.getElementById(
         `${prodEnCarrito.nombre}Carrito`
       );
-      modificarProdCarrito(
-        "aumentar",
-        prodEnCarrito,
-        prodEnStock,
-        filaCarrito,
-        this
-      );
+      modificarProdCarrito("aumentar", prodEnCarrito, filaCarrito, this);
     }
   }
 
@@ -208,8 +190,6 @@ class Cliente {
     let seccionCarrito = document.getElementsByClassName("carrito")[0];
 
     for (let prodEnCarrito of this.carrito) {
-      let prodEnStock = buscarPorNombre(prodEnCarrito.nombre, stock);
-
       // Crear fila para el producto
 
       let filaCarrito = document.createElement("div");
@@ -229,13 +209,7 @@ class Cliente {
       botonDisminuir.className = "btn btn-primary mx-2";
       botonDisminuir.innerHTML = '<i class="bi bi-chevron-down"></i>';
       botonDisminuir.onclick = () =>
-        modificarProdCarrito(
-          "disminuir",
-          prodEnCarrito,
-          prodEnStock,
-          filaCarrito,
-          this
-        );
+        modificarProdCarrito("disminuir", prodEnCarrito, filaCarrito, this);
 
       let cantProd = document.createElement("span");
       cantProd.className = "px-2 py-1 border border-2";
@@ -246,13 +220,7 @@ class Cliente {
       botonAumentar.className = "btn btn-primary mx-2";
       botonAumentar.innerHTML = '<i class="bi bi-chevron-up"></i>';
       botonAumentar.onclick = () =>
-        modificarProdCarrito(
-          "aumentar",
-          prodEnCarrito,
-          prodEnStock,
-          filaCarrito,
-          this
-        );
+        modificarProdCarrito("aumentar", prodEnCarrito, filaCarrito, this);
 
       // Total por producto
 
@@ -309,13 +277,8 @@ function formatearPrecio(precio) {
   )}${Math.trunc(precio % 10)}`;
 }
 
-function modificarProdCarrito(
-  operacion,
-  prodEnCarrito,
-  prodEnStock,
-  filaCarrito,
-  cliente
-) {
+function modificarProdCarrito(operacion, prodEnCarrito, filaCarrito, cliente) {
+  let prodEnStock = buscarPorNombre(prodEnCarrito.nombre, stock);
   if (operacion == "disminuir") {
     if (prodEnCarrito.cant > 0) {
       prodEnCarrito.cant--;
