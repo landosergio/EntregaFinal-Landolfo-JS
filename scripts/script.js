@@ -117,7 +117,7 @@ class Cliente {
 
     if (!prodEnCarrito) {
       // Crear objeto para el carrito e inicializar cantidad
-      let prodEnCarrito = Object.assign({}, prodEnStock);
+      let prodEnCarrito = JSON.parse(JSON.stringify(prodEnStock));
       prodEnCarrito.cant = 1;
 
       // Crear fila para el producto
@@ -188,59 +188,69 @@ class Cliente {
     actualizarStock(stock, this, "recuperar carrito");
 
     let seccionCarrito = document.getElementsByClassName("carrito")[0];
+    let carritoTemp = [...this.carrito];
+    /* Se puede utilizar el operador "spread" ya que en este caso no es necesario 
+    proteger los valores internos de los objetos. */
 
     for (let prodEnCarrito of this.carrito) {
-      // Crear fila para el producto
+      if (prodEnCarrito.cant) {
+        // Crear fila para el producto
 
-      let filaCarrito = document.createElement("div");
-      filaCarrito.className =
-        "d-flex justify-content-around align-items-center py-3 my-3 border border-2 rounded-2";
-      filaCarrito.id = `${prodEnCarrito.nombre}Carrito`;
+        let filaCarrito = document.createElement("div");
+        filaCarrito.className =
+          "d-flex justify-content-around align-items-center py-3 my-3 border border-2 rounded-2";
+        filaCarrito.id = `${prodEnCarrito.nombre}Carrito`;
 
-      // Tarjeta
-      let tarjetaProd = crearTarjeta(prodEnCarrito, "carrito");
+        // Tarjeta
+        let tarjetaProd = crearTarjeta(prodEnCarrito, "carrito");
 
-      // Cantidad de productos en el carrito y botones
-      let cantYBotones = document.createElement("div");
-      cantYBotones.className = "d-flex align-items-center";
+        // Cantidad de productos en el carrito y botones
+        let cantYBotones = document.createElement("div");
+        cantYBotones.className = "d-flex align-items-center";
 
-      let botonDisminuir = document.createElement("button");
-      botonDisminuir.type = "button";
-      botonDisminuir.className = "btn btn-primary mx-2";
-      botonDisminuir.innerHTML = '<i class="bi bi-chevron-down"></i>';
-      botonDisminuir.onclick = () =>
-        modificarProdCarrito("disminuir", prodEnCarrito, filaCarrito, this);
+        let botonDisminuir = document.createElement("button");
+        botonDisminuir.type = "button";
+        botonDisminuir.className = "btn btn-primary mx-2";
+        botonDisminuir.innerHTML = '<i class="bi bi-chevron-down"></i>';
+        botonDisminuir.onclick = () =>
+          modificarProdCarrito("disminuir", prodEnCarrito, filaCarrito, this);
 
-      let cantProd = document.createElement("span");
-      cantProd.className = "px-2 py-1 border border-2";
-      cantProd.innerText = `${prodEnCarrito.cant}`;
+        let cantProd = document.createElement("span");
+        cantProd.className = "px-2 py-1 border border-2";
+        cantProd.innerText = `${prodEnCarrito.cant}`;
 
-      let botonAumentar = document.createElement("button");
-      botonAumentar.type = "button";
-      botonAumentar.className = "btn btn-primary mx-2";
-      botonAumentar.innerHTML = '<i class="bi bi-chevron-up"></i>';
-      botonAumentar.onclick = () =>
-        modificarProdCarrito("aumentar", prodEnCarrito, filaCarrito, this);
+        let botonAumentar = document.createElement("button");
+        botonAumentar.type = "button";
+        botonAumentar.className = "btn btn-primary mx-2";
+        botonAumentar.innerHTML = '<i class="bi bi-chevron-up"></i>';
+        botonAumentar.onclick = () =>
+          modificarProdCarrito("aumentar", prodEnCarrito, filaCarrito, this);
 
-      // Total por producto
+        // Total por producto
 
-      let totalProducto = document.createElement("span");
-      totalProducto.className = "fs-4";
-      totalProducto.innerText = formatearPrecio(
-        prodEnCarrito.precio * prodEnCarrito.cant
-      );
+        let totalProducto = document.createElement("span");
+        totalProducto.className = "fs-4";
+        totalProducto.innerText = formatearPrecio(
+          prodEnCarrito.precio * prodEnCarrito.cant
+        );
 
-      // INYECTAR EN HTML
-      seccionCarrito.appendChild(filaCarrito);
+        // INYECTAR EN HTML
+        seccionCarrito.appendChild(filaCarrito);
 
-      filaCarrito.appendChild(tarjetaProd);
+        filaCarrito.appendChild(tarjetaProd);
 
-      cantYBotones.appendChild(botonDisminuir);
-      cantYBotones.appendChild(cantProd);
-      cantYBotones.appendChild(botonAumentar);
-      filaCarrito.appendChild(cantYBotones);
-      filaCarrito.appendChild(totalProducto);
+        cantYBotones.appendChild(botonDisminuir);
+        cantYBotones.appendChild(cantProd);
+        cantYBotones.appendChild(botonAumentar);
+        filaCarrito.appendChild(cantYBotones);
+        filaCarrito.appendChild(totalProducto);
+      } else {
+        carritoTemp.splice(carritoTemp.indexOf(prodEnCarrito), 1);
+      }
     }
+
+    this.carrito = [...carritoTemp];
+    localStorage.setItem("carrito", JSON.stringify(this.carrito));
 
     this.total = this.carrito.reduce(
       (acum, prodEnCarrito) => acum + prodEnCarrito.precio * prodEnCarrito.cant,
@@ -256,7 +266,7 @@ class Cliente {
     this.total = 0;
     let seccionCarrito = document.getElementsByClassName("carrito")[0];
     seccionCarrito.innerHTML = "";
-    localStorage.setItem("carrito", 0);
+    localStorage.setItem("carrito", JSON.stringify([]));
   }
 }
 
