@@ -90,26 +90,78 @@
     </header>
 
     <main>
-      <h1>¡Bienvenido!</h1>
+      <h1 class="text-center my-4">¡Bienvenido!</h1>
+
+      <div class="login container d-flex justify-content-end">
+        <form class="col-3" id="formIniciarSesion">
+          <div class="mb-3">
+            <label for="nomUsuario" class="form-label">Nombre de usuario</label>
+            <input type="text" class="form-control" id="nomUsuario" />
+          </div>
+          <div class="mb-3">
+            <label for="contrasena" class="form-label">Contraseña</label>
+            <input type="password" class="form-control" id="contrasena" />
+          </div>
+          <button type="submit" class="btn btn-primary">Ingresar</button>
+        </form>
+      </div>
+      <div class="container d-none justify-content-end my-4" id="loginFallido">
+        <span class="fs-5 text-danger bold"
+          >Nombre de usuario o contraseña incorrectos</span
+        >
+      </div>
 
       <div class="container">
         <h2 class="text-center my-5">Productos</h2>
 
         <div class="productos"></div>
 
-        <button id="botonMasProd">Ver más productos</button>
+        <button class="btn btn-primary" id="botonMasProd">
+          Ver más productos
+        </button>
       </div>
 
       <div class="container">
         <h2 class="text-center my-5">Carrito</h2>
 
         <div class="carrito"></div>
-        <button id="botonVaciarCarrito">Vaciar carrito</button>
+        <p class="total fs-2 text-end">Total a pagar: <span></span></p>
+        <button class="my-4 btn btn-primary" id="botonVaciarCarrito">
+          Vaciar carrito
+        </button>
       </div>
     </main>
 
     <!-- FOOTER -->
     <footer></footer>
+
+    <!-- TOASTS -->
+
+    <!-- Loguear-->
+
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+      <div
+        id="toastLoguear"
+        class="toast"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+      >
+        <div class="toast-header">
+          <strong class="me-auto">¡Cuidado!</strong>
+          <small></small>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="toast"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="toast-body">
+          Debés estar logueado para agregar un producto a tu carrito.
+        </div>
+      </div>
+    </div>
 
     <!-- SCRIPTS -->
     <!-- Bootstrap -->
