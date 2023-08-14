@@ -1,0 +1,86 @@
+[
+  {
+    "nombre": "TV Samsung 50 pulgadas",
+    "precio": 207000,
+    "cant": 4,
+    "rutaImg": "images/tv-samsung-50.png",
+    "precioFormat": "$207.000"
+  },
+  {
+    "nombre": "Notebook Lenovo",
+    "precio": 260000,
+    "cant": 999,
+    "rutaImg": "images/notebook-lenovo.jpeg",
+    "precioFormat": "$260.000"
+  },
+  {
+    "nombre": "Zapatillas Nike",
+    "precio": 65000,
+    "cant": 999,
+    "rutaImg": "images/zapa-nike.jpeg",
+    "precioFormat": "$65.000"
+  },
+  {
+    "nombre": "Remera blanca lisa",
+    "precio": 6000,
+    "cant": 999,
+    "rutaImg": "images/rem-blanca-lisa.webp",
+    "precioFormat": "$6.000"
+  },
+  {
+    "nombre": "Remera negra lisa",
+    "precio": 5200,
+    "cant": 999,
+    "rutaImg": "images/rem-negra-lisa.webp",
+    "precioFormat": "$5.200"
+  },
+  {
+    "nombre": "Botas mujer 47 Street",
+    "precio": 22000,
+    "cant": 999,
+    "rutaImg": "images/botas-mujer.jpg",
+    "precioFormat": "$22.000"
+  },
+  {
+    "nombre": "Guitarra Eléctrica Fender",
+    "precio": 830000,
+    "cant": 999,
+    "rutaImg": "images/guit-fender.jpg",
+    "precioFormat": "$830.000"
+  },
+  {
+    "nombre": "Piano digital Yamaha P-45",
+    "precio": 357000,
+    "cant": 999,
+    "rutaImg": "images/piano-digital.jpg",
+    "precioFormat": "$357.000"
+  },
+  {
+    "nombre": "Batería acústica Parquer",
+    "precio": 290000,
+    "cant": 999,
+    "rutaImg": "images/bateria-parquer.webp",
+    "precioFormat": "$290.000"
+  },
+  {
+    "nombre": "Cocina Whirlpool",
+    "precio": 160000,
+    "cant": 999,
+    "rutaImg": "images/coc-whirlpool.jpg",
+    "precioFormat": "$160.000"
+  },
+  {
+    "nombre": "Horno eléctrico Peabody",
+    "precio": 45000,
+    "cant": 999,
+    "rutaImg": "images/horno-elec.webp",
+    "precioFormat": "$45.000"
+  },
+  {
+    "nombre": "Kit de herramientas Kroner",
+    "precio": 28000,
+    "cant": 999,
+    "rutaImg": "images/kit-herramientas.jpg",
+    "precioFormat": "$28.000"
+  }
+]

@@ -19,11 +19,7 @@ Para probar la falta de stock, el primer producto (TV Samsung) tiene sólo 4 uni
 
 
 *** FALTA IMPLEMENTAR ***
-- Agregar imágenes de productos
-- Mostrar el total del carrito
 - Finalizar la compra.
-- Cambiar algunos alert por toast
-
 
 
 
@@ -33,7 +29,7 @@ Para probar la falta de stock, el primer producto (TV Samsung) tiene sólo 4 uni
 //
 //
 //
-//                             -- STOCK Y USUARIOS --
+//                             -- CLASES --
 
 class Producto {
   constructor(nombre, precio, cant, rutaImg) {
@@ -45,108 +41,8 @@ class Producto {
   }
 }
 
-const tvSamsung = new Producto(
-  'TV Samsung 50"',
-  207000,
-  4,
-  "images/tv-samsung-50.png"
-);
-const notebookLenovo = new Producto(
-  "Notebook Lenovo",
-  260000,
-  999,
-  "images/notebook-lenovo.jpeg"
-);
-const zapaNike = new Producto(
-  "Zapatillas Nike",
-  65000,
-  999,
-  "images/zapa-nike.jpeg"
-);
-const remBlancaLisa = new Producto(
-  "Remera blanca lisa",
-  6000,
-  999,
-  "images/rem-blanca-lisa.webp"
-);
-
-const remNegraLisa = new Producto(
-  "Remera negra lisa",
-  5200,
-  999,
-  "images/rem-negra-lisa"
-);
-const botasMujer = new Producto(
-  "Botas mujer 47 Street",
-  22000,
-  999,
-  "images/botas-mujer"
-);
-const guitFender = new Producto(
-  "Guitarra Eléctrica Fender",
-  830000,
-  999,
-  "images/guit-fender.jpg"
-);
-const pianoDigital = new Producto(
-  "Piano digital Yamaha P-45",
-  357000,
-  999,
-  "images/piano-digital"
-);
-const bateriaParquer = new Producto(
-  "Batería acústica Parquer",
-  290000,
-  999,
-  "images/bateria-parquer"
-);
-
-const cocWhirlpool = new Producto(
-  "Cocina Whirlpool",
-  160000,
-  999,
-  "images/coc-whirlpool"
-);
-
-const hornoElec = new Producto(
-  "Horno eléctrico Peabody",
-  45000,
-  999,
-  "images/horno-elec"
-);
-
-const kitHerramientas = new Producto(
-  "Kit de herramientas Kroner",
-  28000,
-  999,
-  "images/kit-herramientas"
-);
-
-let stock = [
-  tvSamsung,
-  notebookLenovo,
-  zapaNike,
-  remBlancaLisa,
-  remNegraLisa,
-  botasMujer,
-  guitFender,
-  pianoDigital,
-  bateriaParquer,
-  cocWhirlpool,
-  hornoElec,
-  kitHerramientas,
-];
-
-const usuarios = [
-  { nom: "sergio", cont: "123" },
-  { nom: "juan", cont: "456" },
-];
-
 //
 //
-//
-//
-//                              -- CLASE CLIENTE --
 
 class Cliente {
   constructor(nomUsuario) {
@@ -184,6 +80,7 @@ class Cliente {
           JSON.stringify(this.carrito)
         );
         localStorage.setItem("stock", JSON.stringify(stock));
+        totalCompra.innerText = formatearPrecio(this.total);
       } else {
         // B - ACTUALIZAR EL OBJETO EN EL CARRITO
         let filaCarrito = document.getElementById(
@@ -192,7 +89,20 @@ class Cliente {
         modificarProdCarrito("aumentar", prodEnCarrito, filaCarrito);
       }
     } else {
-      alert("No hay más unidades de este producto en stock");
+      Toastify({
+        text: "No hay más unidades de este producto en stock. ",
+        duration: 2000,
+        newWindow: true,
+        close: true,
+        gravity: "top",
+        position: "right",
+        style: {
+          background:
+            "linear-gradient(90deg, rgba(255,84,84,1) 0%, rgba(162,0,0,1) 100%)",
+        },
+        stopOnFocus: true,
+        className: "fw-bold rounded-3",
+      }).showToast();
     }
   }
 
@@ -227,6 +137,7 @@ class Cliente {
       (acum, prodEnCarrito) => acum + prodEnCarrito.precio * prodEnCarrito.cant,
       0
     );
+    totalCompra.innerText = formatearPrecio(this.total);
   }
 
   //
@@ -242,6 +153,7 @@ class Cliente {
     let seccionCarrito = document.getElementsByClassName("carrito")[0];
     seccionCarrito.innerHTML = "";
     localStorage.setItem(`${cliente.nomUsuario}-carrito`, JSON.stringify([]));
+    totalCompra.innerText = "$0.000";
   }
 }
 
@@ -252,56 +164,149 @@ class Cliente {
 //                             -- FUNCIONES --
 
 //
-/*          Formatear precio */
+/*          Cargar usuarios */
 
-/* Consulta por cada dígito si es distinto de 0 y si los dígitos de mayor orden también lo son. Puede formatear precios de 1.000 a 9.999.999. */
+/* Carga los usuarios de la "base de datos" (archivo JSON) */
 
-function formatearPrecio(precio) {
-  let uM = Math.trunc((precio % 10000000) / 1000000);
-  let cK = Math.trunc((precio % 1000000) / 100000);
-  let dK = Math.trunc((precio % 100000) / 10000);
-  let uK = Math.trunc((precio % 10000) / 1000);
-
-  return `$${uM || ""}${uM ? "." + cK : cK || ""}${
-    uM ? dK : cK ? dK : dK || ""
-  }${uK}.${Math.trunc((precio % 1000) / 100)}${Math.trunc(
-    (precio % 100) / 10
-  )}${Math.trunc(precio % 10)}`;
+async function cargarUsuarios() {
+  let usuariosDB = await fetch("usuarios.json");
+  usuariosDBJSON = await usuariosDB.json();
+  usuarios = usuariosDBJSON;
 }
 
 //
-/*          Modificar Productos en Carrito */
+/*          Cargar stock */
 
-/* Busca el producto en el stock(array). Actualiza la cantidad según la operación solicitada y la disponibilidad de cada producto.
-Actualiza HTML y stock(storage). */
+/* Busca el stock(storage). En caso de que no exista, se carga desde la "base de datos" (archivo JSON) y se guarda en storage; si existe, se recupera.
+Se cargan los productos para mostrar en la página. */
 
-function modificarProdCarrito(operacion, prodEnCarrito, filaCarrito) {
-  let prodEnStock = buscarPorNombre(prodEnCarrito.nombre, stock);
-  if (operacion == "disminuir") {
-    if (prodEnCarrito.cant > 0) {
-      prodEnCarrito.cant--;
-      prodEnStock.cant++;
-      cliente.total -= prodEnCarrito.precio;
-    }
-  } else if (operacion == "aumentar") {
-    if (prodEnStock.cant > 0) {
-      prodEnCarrito.cant++;
-      prodEnStock.cant--;
-      cliente.total += prodEnCarrito.precio;
-    } else {
-      alert("No hay más unidades de este producto en stock");
-    }
+async function cargarStock() {
+  let stockActual = localStorage.getItem("stock");
+
+  if (!stockActual) {
+    let stockDB = await fetch("stock.json");
+
+    stockDBJSON = await stockDB.json();
+    stock = stockDBJSON;
+    localStorage.setItem("stock", JSON.stringify(stock));
+  } else {
+    stock = JSON.parse(stockActual);
   }
 
-  filaCarrito.childNodes[1].childNodes[1].innerText = `${prodEnCarrito.cant}`;
-  filaCarrito.childNodes[2].innerText = `${formatearPrecio(
-    prodEnCarrito.precio * prodEnCarrito.cant
-  )}`;
-  localStorage.setItem(
-    `${cliente.nomUsuario}-carrito`,
-    JSON.stringify(cliente.carrito)
-  );
-  localStorage.setItem("stock", JSON.stringify(stock));
+  prodMostrados = mostrarMasProd(prodMostrados, seccionProductos);
+}
+
+//
+/*         Mostrar más productos */
+
+/* Crea y carga una fila para el producto en el carrito, compuesta por una variación de la tarjeta del producto, la cantidad de 
+ese producto en el carrito y los botones para aumentar y disminuir y el total para ese producto.  */
+
+function mostrarMasProd(prodMostrados, seccionProductos) {
+  if (prodMostrados.length < stock.length) {
+    let nuevosProd = obtenerNuevosProd(prodMostrados.length);
+
+    prodMostrados = prodMostrados.concat(nuevosProd);
+    cargarHTMLSeccionProd(nuevosProd, seccionProductos);
+    mostrarCantProductos(prodMostrados, seccionProductos);
+
+    return prodMostrados;
+  }
+}
+
+//
+/*          Obtener nuevos productos */
+
+/* Toma 4 productos del stock desde el último mostrado. */
+
+function obtenerNuevosProd(ultimoProd) {
+  let productos = stock.slice(ultimoProd, ultimoProd + 4);
+
+  return productos;
+}
+
+//
+/*          Cargar HTML sección "productos" */
+
+/* Crea una fila con las tarjetas de los productos tomados del stock y la carga en la página. Añade los eventos al botón de compra. */
+
+function cargarHTMLSeccionProd(nuevosProd, seccionProductos) {
+  let fila = document.createElement("div");
+  fila.className = "d-flex justify-content-around my-4";
+
+  for (let producto of nuevosProd) {
+    let tarjetaProd = crearTarjeta(producto, "stock");
+    let botonCompra = tarjetaProd.childNodes[3].childNodes[5];
+
+    botonCompra.onclick = () => {
+      if (logueado) {
+        cliente.anadirProducto(producto);
+      } else {
+        Toastify({
+          text: "¡Tenés que loguearte para poder agregar artículos a tu carrito! ",
+          duration: 4000,
+          newWindow: true,
+          close: true,
+          gravity: "top",
+          position: "right",
+          stopOnFocus: true,
+          className: "fw-bold rounded-3",
+        }).showToast();
+      }
+    };
+    fila.appendChild(tarjetaProd);
+  }
+
+  seccionProductos.appendChild(fila);
+}
+
+//
+/*          Mostrar cantidad de productos. */
+
+/* Carga al final de los productos la cantidad de mostrados y la cantidad en stock. */
+
+function mostrarCantProductos(prodMostrados, seccionProductos) {
+  let mensajeViejo;
+  if ((mensajeViejo = document.getElementById("mostrando"))) {
+    mensajeViejo.remove();
+  }
+  let mensaje = document.createElement("p");
+  mensaje.id = "mostrando";
+  mensaje.className = "fs-4 my-3";
+  mensaje.innerText = `Mostrando ${prodMostrados.length} de ${stock.length} productos.`;
+  seccionProductos.appendChild(mensaje);
+}
+
+//
+/*          Crear tarjeta */
+
+/* Crea la tarjeta para el producto según sea para el stock o para el carrito. */
+
+function crearTarjeta(producto, tipo) {
+  let tarjetaProd = document.createElement("div");
+  tarjetaProd.className = "card";
+
+  if (tipo == "stock") {
+    tarjetaProd.style = "width: 12rem;";
+    tarjetaProd.innerHTML = `
+  <img src="${producto.rutaImg}" class="card-img-top p-2" alt="${producto.nombre}">
+  <div class="card-body">
+    <h5 class="card-title">${producto.nombre}</h5>
+    <p class="card-text">${producto.precioFormat}</p>
+    <a href="#" class="btn btn-primary">Comprar</a>
+  </div>`;
+  } else if (tipo == "carrito") {
+    tarjetaProd.style = "width: 8rem;";
+    tarjetaProd.className = "d-flex align-items-center";
+    tarjetaProd.innerHTML = `
+ <img src="${producto.rutaImg}" class="card-img-top me-3" alt="${producto.nombre}">
+ <div class="card-body">
+   <h5 class="card-title">${producto.nombre}</h5>
+   <p class="card-text">${producto.precioFormat}</p>
+ </div>`;
+  }
+
+  return tarjetaProd;
 }
 
 //
@@ -362,120 +367,53 @@ function cargarFilaCarrito(prodEnCarrito, seccionCarrito) {
 }
 
 //
-/*         Mostrar más productos */
+/*          Modificar Productos en Carrito */
 
-/* Crea y carga una fila para el producto en el carrito, compuesta por una variación de la tarjeta del producto, la cantidad de 
-ese producto en el carrito y los botones para aumentar y disminuir y el total para ese producto.  */
+/* Busca el producto en el stock(array). Actualiza la cantidad según la operación solicitada y la disponibilidad de cada producto.
+Actualiza HTML y stock(array y storage). */
 
-function mostrarMasProd(prodMostrados, seccionProductos) {
-  if (prodMostrados.length < stock.length) {
-    let nuevosProd = obtenerNuevosProd(prodMostrados.length);
-
-    prodMostrados = prodMostrados.concat(nuevosProd);
-    cargarHTMLSeccionProd(nuevosProd, seccionProductos);
-    mostrarCantProductos(prodMostrados, seccionProductos);
-
-    return prodMostrados;
-  }
-}
-
-//
-/*          Obtener nuevos productos */
-
-/* Toma 4 productos del stock desde el último mostrado. */
-
-function obtenerNuevosProd(ultimoProd) {
-  let productos = stock.slice(ultimoProd, ultimoProd + 4);
-
-  return productos;
-}
-
-//
-/*          Cargar HTML sección "productos" */
-
-/* Crea una fila con las tarjetas de los productos tomados del stock y la carga en la página. Añade los eventos al botón de compra. */
-
-function cargarHTMLSeccionProd(nuevosProd, seccionProductos) {
-  let fila = document.createElement("div");
-  fila.className = "d-flex justify-content-around my-4";
-
-  for (let producto of nuevosProd) {
-    let tarjetaProd = crearTarjeta(producto, "stock");
-    let botonCompra = tarjetaProd.childNodes[3].childNodes[5];
-
-    const toastLoguear = document.getElementById("toastLoguear");
-    const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastLoguear);
-
-    botonCompra.onclick = () => {
-      if (logueado) {
-        cliente.anadirProducto(producto);
-      } else {
-        toastBootstrap.show();
-      }
-    };
-    fila.appendChild(tarjetaProd);
+function modificarProdCarrito(operacion, prodEnCarrito, filaCarrito) {
+  let prodEnStock = buscarPorNombre(prodEnCarrito.nombre, stock);
+  if (operacion == "disminuir") {
+    if (prodEnCarrito.cant > 0) {
+      prodEnCarrito.cant--;
+      prodEnStock.cant++;
+      cliente.total -= prodEnCarrito.precio;
+      totalCompra.innerText = formatearPrecio(cliente.total);
+    }
+  } else if (operacion == "aumentar") {
+    if (prodEnStock.cant > 0) {
+      prodEnCarrito.cant++;
+      prodEnStock.cant--;
+      cliente.total += prodEnCarrito.precio;
+      totalCompra.innerText = formatearPrecio(cliente.total);
+    } else {
+      Toastify({
+        text: "No hay más unidades de este producto en stock. ",
+        duration: 2000,
+        newWindow: true,
+        close: true,
+        gravity: "top",
+        position: "right",
+        style: {
+          background:
+            "linear-gradient(90deg, rgba(255,84,84,1) 0%, rgba(162,0,0,1) 100%)",
+        },
+        stopOnFocus: true,
+        className: "fw-bold rounded-3",
+      }).showToast();
+    }
   }
 
-  seccionProductos.appendChild(fila);
-}
-
-//
-/*          Crear tarjeta */
-
-/* Crea la tarjeta para el producto según sea para el stock o para el carrito. */
-
-function crearTarjeta(producto, tipo) {
-  let tarjetaProd = document.createElement("div");
-  tarjetaProd.className = "card";
-
-  if (tipo == "stock") {
-    tarjetaProd.style = "width: 12rem;";
-    tarjetaProd.innerHTML = `
-  <img src="${producto.rutaImg}" class="card-img-top" alt="${producto.nombre}">
-  <div class="card-body">
-    <h5 class="card-title">${producto.nombre}</h5>
-    <p class="card-text">${producto.precioFormat}</p>
-    <a href="#" class="btn btn-primary">Comprar</a>
-  </div>`;
-  } else if (tipo == "carrito") {
-    tarjetaProd.style = "width: 8rem;";
-    tarjetaProd.className = "d-flex align-items-center";
-    tarjetaProd.innerHTML = `
- <img src="${producto.rutaImg}" class="card-img-top me-3" alt="${producto.nombre}">
- <div class="card-body">
-   <h5 class="card-title">${producto.nombre}</h5>
-   <p class="card-text">${producto.precioFormat}</p>
- </div>`;
-  }
-
-  return tarjetaProd;
-}
-
-//
-/*          Mostrar cantidad de productos. */
-
-/* Carga al final de los productos la cantidad de mostrados y la cantidad en stock. */
-
-function mostrarCantProductos(prodMostrados, seccionProductos) {
-  let mensajeViejo;
-  if ((mensajeViejo = document.getElementById("mostrando"))) {
-    mensajeViejo.remove();
-  }
-  let mensaje = document.createElement("p");
-  mensaje.id = "mostrando";
-  mensaje.className = "fs-4 my-3";
-  mensaje.innerText = `Mostrando ${prodMostrados.length} de ${stock.length} productos.`;
-  seccionProductos.appendChild(mensaje);
-}
-
-//
-/*          Buscar por nombre */
-
-/* Busca un producto por su nombre en cualquier listado. */
-
-function buscarPorNombre(nombre, listaProd) {
-  let prodBuscado = listaProd.find((producto) => producto.nombre == nombre);
-  return prodBuscado;
+  filaCarrito.childNodes[1].childNodes[1].innerText = `${prodEnCarrito.cant}`;
+  filaCarrito.childNodes[2].innerText = `${formatearPrecio(
+    prodEnCarrito.precio * prodEnCarrito.cant
+  )}`;
+  localStorage.setItem(
+    `${cliente.nomUsuario}-carrito`,
+    JSON.stringify(cliente.carrito)
+  );
+  localStorage.setItem("stock", JSON.stringify(stock));
 }
 
 //
@@ -492,17 +430,31 @@ function devolverAStock() {
 }
 
 //
-/*          Recuperar stock */
+/*          Formatear precio */
 
-/* Verifica si existe stock(storage); si es así, lo carga en el stock(array) */
+/* Consulta por cada dígito si es distinto de 0 y si los dígitos de mayor orden también lo son. Puede formatear precios de 1.000 a 9.999.999. */
 
-function recuperarStock() {
-  let stockActual = localStorage.getItem("stock");
-  if (!stockActual) {
-    localStorage.setItem("stock", JSON.stringify(stock));
-  } else {
-    stock = JSON.parse(stockActual);
-  }
+function formatearPrecio(precio) {
+  let uM = Math.trunc((precio % 10000000) / 1000000);
+  let cK = Math.trunc((precio % 1000000) / 100000);
+  let dK = Math.trunc((precio % 100000) / 10000);
+  let uK = Math.trunc((precio % 10000) / 1000);
+
+  return `$${uM || ""}${uM ? "." + cK : cK || ""}${
+    uM ? dK : cK ? dK : dK || ""
+  }${uK}.${Math.trunc((precio % 1000) / 100)}${Math.trunc(
+    (precio % 100) / 10
+  )}${Math.trunc(precio % 10)}`;
+}
+
+//
+/*          Buscar por nombre */
+
+/* Busca un producto por su nombre en cualquier listado. */
+
+function buscarPorNombre(nombre, listaProd) {
+  let prodBuscado = listaProd.find((producto) => producto.nombre == nombre);
+  return prodBuscado;
 }
 
 //
@@ -550,14 +502,24 @@ function iniciarSesion() {
   let nomUsuario = document.getElementById("nomUsuario").value;
   let contrasena = document.getElementById("contrasena").value;
 
-  let mensaje = document.getElementById("loginFallido");
-
   if (usuarios.some((usu) => usu.nom == nomUsuario && usu.cont == contrasena)) {
-    mensaje.className = "container d-none justify-content-end my-4";
-
     return nomUsuario;
   } else {
-    mensaje.className = "container d-flex justify-content-end my-4";
+    Toastify({
+      text: "Nombre de usuario o contraseña incorrectos. ",
+      duration: 2000,
+      newWindow: true,
+      close: true,
+      gravity: "top",
+      position: "right",
+      style: {
+        background:
+          "linear-gradient(90deg, rgba(255,84,84,1) 0%, rgba(162,0,0,1) 100%)",
+      },
+      stopOnFocus: true,
+      className: "fw-bold rounded-3",
+    }).showToast();
+
     return 0;
   }
 }
@@ -586,14 +548,17 @@ function crearBotonCerrarSesion() {
 //
 //                             --- INICIALIZACIÓN ---
 
-/* Se recupera el stock. Se cargan los productos para mostrar en la página. Se verifica si hay algún usuario logueado; de ser así, se crea
-el objeto "cliente" y se recupera su carrito. */
+/* Se inicializan las variables principales y se cargan el stock y los usuarios de la "base de datos".
+Se verifica si hay algún usuario logueado; de ser así, se creael objeto "cliente" y se recupera su carrito. */
 
-recuperarStock();
-
+let usuarios;
+let stock;
 let prodMostrados = [];
 let seccionProductos = document.querySelector(".productos");
-prodMostrados = mostrarMasProd(prodMostrados, seccionProductos);
+let totalCompra = document.getElementById("totalCompra");
+
+cargarStock();
+cargarUsuarios();
 
 let logueado = localStorage.getItem("logueado");
 let cliente;
@@ -605,3 +570,37 @@ if (logueado == "1") {
 
   crearBotonCerrarSesion();
 }
+
+//
+//
+//
+//
+//
+// ------------------------------------------------------------------------------------------------------
+
+//
+/*          Buscar pokemon */
+
+/* Genera un número aleatorio de 1 a 1009   */
+
+function buscarPoke() {
+  let pokeNum = Math.round(Math.random() * 1009 + 1);
+  let pokeDiv = document.getElementsByClassName("pokeDiv")[0];
+  let pokeFetch = fetch(`https://pokeapi.co/api/v2/pokemon/${pokeNum}`);
+  let pokePromesa = new Promise((resolve, reject) => {
+    resolve(pokeFetch);
+  });
+  let pokeJson = pokePromesa.then((result) => result.json());
+
+  pokeJson.then((pokeData) => {
+    pokeDiv.innerHTML = `<img style="width: 150px" src="${
+      pokeData.sprites.front_default
+    }"><p class="text-center">¡Felicitaciones! 
+    Hoy te acompañará ${pokeData.name[0].toUpperCase()}${pokeData.name.slice(
+      1
+    )}.`;
+  });
+}
+
+let botonBuscarPoke = document.getElementById("botonBuscarPoke");
+botonBuscarPoke.onclick = () => buscarPoke();
