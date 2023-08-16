@@ -2,24 +2,21 @@
 
 Notas
 
-La página cuenta con un stock de productos (array "stock") que se inicializa la primera vez que entramos y se guarda en Local Storage. A partir de ese momento el 
-stock en LS funcionará como una "base de datos" única con la que podemos interactuar con dos usuarios diferentes. Intenté ponerlo en otro archivo e importarlo de
-varias formas pero siempre tenía algún error.
+La página cuenta con un stock de productos en un archivo aparte (stock.json) que se carga en Local Storage la primera vez que ingresamos.
+A partir de ese momento el stock en LS funcionará como una "base de datos" única con la que podemos interactuar con usuarios diferentes.
 
-
-Es obligatorio estar logueado para poder agregar productos al carrito y contamos con dos usuarios (array "usuarios") para hacer pruebas: 
+Es obligatorio estar logueado para poder agregar productos al carrito y contamos con dos usuarios para hacer pruebas: 
 usuario: "sergio" contraseña "123"  
 usuario: "juan" contraseña: "456"
+También se pueden crear nuevos usuarios que se agregan al LS.
 
-Cada uno tiene su propio carrito e interactúa con el stock modificando los productos disponibles. El carrito NO se vacía al cerrar sesión, para simular
-la disponibilidad de productos en caso de que ambos usuarios estuvieran conectados al mismo tiempo. Se puede vaciar manualmente con el botón correspondiente. 
+Cada uno tiene su propio carrito e interactúa con el stock modificando los productos disponibles.
+El carrito no se vacía al cerrar sesión para simular la disponibilidad de productos en caso de que ambos usuarios estuvieran conectados al mismo tiempo.
 Para probar la falta de stock, el primer producto (TV Samsung) tiene sólo 4 unidades.
 
+Al finalizar la compra los productos son retirados definitivamente del stock(storage).
 
 
-
-*** FALTA IMPLEMENTAR ***
-- Finalizar la compra.
 
 
 
@@ -81,12 +78,37 @@ class Cliente {
         );
         localStorage.setItem("stock", JSON.stringify(stock));
         totalCompra.innerText = formatearPrecio(this.total);
+
+        Swal.fire({
+          title: prodEnCarrito.nombre,
+          text: "se agregó a tu carrito.",
+          imageUrl: prodEnCarrito.rutaImg,
+          imageWidth: 200,
+          imageHeight: 200,
+          imageAlt: prodEnCarrito.nombre,
+          confirmButtonColor: "#0d6efd",
+        });
       } else {
         // B - ACTUALIZAR EL OBJETO EN EL CARRITO
         let filaCarrito = document.getElementById(
           `${prodEnCarrito.nombre}Carrito`
         );
         modificarProdCarrito("aumentar", prodEnCarrito, filaCarrito);
+
+        Toastify({
+          text: `${prodEnCarrito.nombre} ya estaba en tu carrito. Se agregó otra unidad. `,
+          duration: 2000,
+          newWindow: true,
+          close: true,
+          gravity: "top",
+          position: "right",
+          style: {
+            background:
+              "linear-gradient(76deg, rgba(0,144,43,1) 0%, rgba(46,255,95,1) 100%)",
+          },
+          stopOnFocus: true,
+          className: "fw-bold rounded-3",
+        }).showToast();
       }
     } else {
       Toastify({
@@ -145,8 +167,10 @@ class Cliente {
 
   /* Vacía el carrito. Actualiza stock(array y storage), total, HTML y carrito(storage). */
 
-  vaciarCarrito() {
-    devolverAStock();
+  vaciarCarrito(operacionStock) {
+    if (operacionStock == "devolver") {
+      devolverAStock();
+    }
 
     this.carrito = [];
     this.total = 0;
@@ -154,6 +178,35 @@ class Cliente {
     seccionCarrito.innerHTML = "";
     localStorage.setItem(`${cliente.nomUsuario}-carrito`, JSON.stringify([]));
     totalCompra.innerText = "$0.000";
+  }
+
+  //
+  /*          Finalizar compra */
+
+  /* Pide confirmación para finalizar la compra y vacía el carrito pero sin devolver los productos al stock.  */
+
+  finalizarCompra() {
+    Swal.fire({
+      title: `El total es de ${formatearPrecio(this.total)}`,
+      text: "¿Estás seguro de finalizar la compra?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#0d6efd",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Comprar",
+      cancelButtonText: "Cancelar",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.vaciarCarrito();
+
+        Swal.fire({
+          title: "¡Compra realizada!",
+          text: "Se enviarán los detalles a tu correo.",
+          icon: "success",
+          confirmButtonColor: "#0d6efd",
+        });
+      }
+    });
   }
 }
 
@@ -169,9 +222,15 @@ class Cliente {
 /* Carga los usuarios de la "base de datos" (archivo JSON) */
 
 async function cargarUsuarios() {
-  let usuariosDB = await fetch("usuarios.json");
-  usuariosDBJSON = await usuariosDB.json();
-  usuarios = usuariosDBJSON;
+  let usuariosLS = JSON.parse(localStorage.getItem("usuarios"));
+  if (!usuariosLS) {
+    let usuariosDB = await fetch("usuarios.json");
+    let usuariosDBJSON = await usuariosDB.json();
+    usuarios = usuariosDBJSON;
+    localStorage.setItem("usuarios", JSON.stringify(usuarios));
+  } else {
+    usuarios = usuariosLS;
+  }
 }
 
 //
@@ -181,16 +240,16 @@ async function cargarUsuarios() {
 Se cargan los productos para mostrar en la página. */
 
 async function cargarStock() {
-  let stockActual = localStorage.getItem("stock");
+  let stockLS = localStorage.getItem("stock");
 
-  if (!stockActual) {
+  if (!stockLS) {
     let stockDB = await fetch("stock.json");
 
-    stockDBJSON = await stockDB.json();
+    let stockDBJSON = await stockDB.json();
     stock = stockDBJSON;
     localStorage.setItem("stock", JSON.stringify(stock));
   } else {
-    stock = JSON.parse(stockActual);
+    stock = JSON.parse(stockLS);
   }
 
   prodMostrados = mostrarMasProd(prodMostrados, seccionProductos);
@@ -458,6 +517,70 @@ function buscarPorNombre(nombre, listaProd) {
 }
 
 //
+/*          Crear cuenta */
+
+/* Pide los datos para crear una cuenta. Verifica si ambos fueron ingresados y si el usuario ya existe */
+
+async function crearCuenta() {
+  const { value: datosCuenta } = await Swal.fire({
+    title: "Ingresá el nombre de usuario y contraseña",
+    html:
+      '<label for="swal-input1">Usuario:' +
+      '<input id="swal-input1" class="swal2-input">' +
+      '<label for="swal-input2">Contraseña:' +
+      '<input id="swal-input2" type="password" class="swal2-input">',
+    focusConfirm: false,
+    confirmButtonColor: "#0d6efd",
+
+    preConfirm: () => {
+      return [
+        document.getElementById("swal-input1").value,
+        document.getElementById("swal-input2").value,
+      ];
+    },
+  });
+
+  if (datosCuenta) {
+    let nomUsuario = datosCuenta[0];
+    let contrasena = datosCuenta[1];
+    if (nomUsuario == "" || contrasena == "") {
+      await Swal.fire({
+        title: "No ingresaste los datos para crear tu cuenta.",
+        icon: "error",
+        confirmButtonColor: "#d33",
+      });
+      crearCuenta();
+    } else if (usuarios.some((usu) => usu.nom == nomUsuario)) {
+      await Swal.fire({
+        title: "El nombre de usuario ya existe.",
+        icon: "error",
+        confirmButtonColor: "#d33",
+      });
+      crearCuenta();
+    } else {
+      agregarUsuario(nomUsuario, contrasena);
+      await Swal.fire({
+        title: "¡El usuario fue creado con éxito!",
+        icon: "success",
+        confirmButtonColor: "#0d6efd",
+      });
+      loguear(nomUsuario);
+    }
+  }
+}
+
+//
+/*          Agregar usuario */
+
+/* Agrega a la "base de datos" un nuevo usuario con los datos ingresados. */
+
+function agregarUsuario(nomUsuario, contrasena) {
+  let nuevoUsuario = { nom: nomUsuario, cont: contrasena };
+  usuarios.push(nuevoUsuario);
+  localStorage.setItem("usuarios", JSON.stringify(usuarios));
+}
+
+//
 //
 //
 //
@@ -469,7 +592,15 @@ botonMostrarMasProd.onclick = () => {
 };
 
 let botonVaciarCarrito = document.getElementById("botonVaciarCarrito");
-botonVaciarCarrito.onclick = () => logueado && cliente.vaciarCarrito();
+botonVaciarCarrito.onclick = () =>
+  logueado && cliente.vaciarCarrito("devolver");
+
+let botonFinalizarCompra = document.getElementById("botonFinalizarCompra");
+botonFinalizarCompra.onclick = () =>
+  logueado && cliente.total != 0 && cliente.finalizarCompra();
+
+let botonCrearCuenta = document.getElementById("botonCrearCuenta");
+botonCrearCuenta.onclick = () => !logueado && crearCuenta();
 
 //
 /*          Formulario para inicio de sesión */
@@ -482,13 +613,7 @@ formIniciarSesion.onsubmit = (e) => {
   e.preventDefault();
   let nomUsuario = iniciarSesion();
   if (nomUsuario) {
-    logueado = 1;
-    localStorage.setItem("logueado", 1);
-    localStorage.setItem("nomUsuario", nomUsuario);
-    cliente = new Cliente(nomUsuario);
-    cliente.recuperarCarrito();
-
-    crearBotonCerrarSesion();
+    loguear(nomUsuario);
   }
 };
 
@@ -522,6 +647,21 @@ function iniciarSesion() {
 
     return 0;
   }
+}
+
+//
+/*
+
+/* */
+
+function loguear(nomUsuario) {
+  logueado = 1;
+  localStorage.setItem("logueado", 1);
+  localStorage.setItem("nomUsuario", nomUsuario);
+  cliente = new Cliente(nomUsuario);
+  cliente.recuperarCarrito();
+
+  crearBotonCerrarSesion();
 }
 
 //

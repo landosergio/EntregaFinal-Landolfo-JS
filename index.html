@@ -27,10 +27,10 @@
       href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
     />
 
-    <title>Entrega Final</title>
-
     <!-- Propio -->
     <link rel="stylesheet" href="CSS/style.css" />
+
+    <title>Entrega Final</title>
   </head>
   <body>
     <!-- HEADER -->
@@ -127,7 +127,16 @@
                 <label for="contrasena" class="form-label">Contraseña</label>
                 <input type="password" class="form-control" id="contrasena" />
               </div>
-              <button type="submit" class="btn btn-primary">Ingresar</button>
+              <div class="d-flex justify-content-between">
+                <button type="submit" class="btn btn-primary">Ingresar</button>
+                <button
+                  type="button"
+                  id="botonCrearCuenta"
+                  class="btn btn-primary"
+                >
+                  Crear cuenta
+                </button>
+              </div>
             </form>
           </div>
         </div>
@@ -150,9 +159,14 @@
         <p class="total fs-2 text-end">
           Total a pagar: <span id="totalCompra">$0.000</span>
         </p>
-        <button class="my-4 btn btn-primary" id="botonVaciarCarrito">
-          Vaciar carrito
-        </button>
+        <div class="d-flex justify-content-between">
+          <button class="my-4 btn btn-primary" id="botonVaciarCarrito">
+            Vaciar carrito
+          </button>
+          <button class="my-4 btn btn-primary" id="botonFinalizarCompra">
+            Finalizar compra
+          </button>
+        </div>
       </div>
     </main>
 
@@ -173,6 +187,9 @@
       type="text/javascript"
       src="https://cdn.jsdelivr.net/npm/toastify-js"
     ></script>
+
+    <!-- Sweet Alert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Propios -->
     <script src="scripts/script.js"></script>

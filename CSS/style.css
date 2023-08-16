@@ -1,3 +1,6 @@
-
+.btn-primary,
+.btn-danger {
+  font-weight: 500;
+}
 
 /*# sourceMappingURL=style.css.map */
