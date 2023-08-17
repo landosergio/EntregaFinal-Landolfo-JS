@@ -649,9 +649,9 @@ function verificarUsuario() {
 }
 
 //
-/*
+/*          Iniciar sesión */
 
-/* */
+/* Crea el nuevo cliente con el nombre de usuario correspondiente y cambia el estado a "logueado" */
 
 function iniciarSesion(nomUsuario) {
   logueado = 1;
@@ -666,7 +666,7 @@ function iniciarSesion(nomUsuario) {
 //
 /*          Crear botón para cerrar sesión */
 
-/* Reemplaza el formulario de logueo con el botón para cerrar sesión y le añade su funcionalidad. */
+/* Reemplaza el formulario de inicio de sesión con el botón para cerrar sesión y le añade su funcionalidad. */
 
 function crearBotonCerrarSesion() {
   let seccionLogin = document.getElementsByClassName("login")[0];
