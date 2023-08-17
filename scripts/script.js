@@ -219,17 +219,17 @@ class Cliente {
 //
 /*          Cargar usuarios */
 
-/* Carga los usuarios de la "base de datos" (archivo JSON) */
+/* Busca los usuarios(storage). En caso de que no exista, se carga desde la "base de datos" (archivo JSON) y se guarda en storage; si existe, se recupera */
 
 async function cargarUsuarios() {
-  let usuariosLS = JSON.parse(localStorage.getItem("usuarios"));
+  let usuariosLS = localStorage.getItem("usuarios");
   if (!usuariosLS) {
     let usuariosDB = await fetch("usuarios.json");
     let usuariosDBJSON = await usuariosDB.json();
     usuarios = usuariosDBJSON;
     localStorage.setItem("usuarios", JSON.stringify(usuarios));
   } else {
-    usuarios = usuariosLS;
+    usuarios = JSON.parse(usuariosLS);
   }
 }
 
@@ -519,7 +519,7 @@ function buscarPorNombre(nombre, listaProd) {
 //
 /*          Crear cuenta */
 
-/* Pide los datos para crear una cuenta. Verifica si ambos fueron ingresados y si el usuario ya existe */
+/* Pide los datos para crear una cuenta. Verifica que ambos se hayan ingresado y si ya existe un usuario con ese nombre. Crea la cuenta e inicia sesión. */
 
 async function crearCuenta() {
   const { value: datosCuenta } = await Swal.fire({
@@ -564,7 +564,7 @@ async function crearCuenta() {
         icon: "success",
         confirmButtonColor: "#0d6efd",
       });
-      loguear(nomUsuario);
+      iniciarSesion(nomUsuario);
     }
   }
 }
@@ -605,25 +605,24 @@ botonCrearCuenta.onclick = () => !logueado && crearCuenta();
 //
 /*          Formulario para inicio de sesión */
 
-/* Llama a la función "iniciarSesion". Si la combinación de nombre de usuario y contraseña son válidos, crea el objeto "cliente", cambia el estado a "logueado"
-y recupera el carrito correspondiente. */
+/* Llama a las funciones "verificarUsuario" e "iniciarSesion" que se encargan del proceso. */
 
 let formIniciarSesion = document.getElementById("formIniciarSesion");
 formIniciarSesion.onsubmit = (e) => {
   e.preventDefault();
-  let nomUsuario = iniciarSesion();
+  let nomUsuario = verificarUsuario();
   if (nomUsuario) {
-    loguear(nomUsuario);
+    iniciarSesion(nomUsuario);
   }
 };
 
 //
-/*          Iniciar sesión */
+/*          Verificar usuario */
 
 /* Captura la entrada en el formulario de inicio de sesión. Consulta en la "base de datos" de usuarios por el nombre y la contraseña.
- Si existe, retorna el nombre de usuario para crear el objeto Cliente. Si no existe, hace visible el mensaje de aviso. */
+ Si existe, retorna el nombre de usuario para crear el objeto Cliente. Si no existe, da aviso. */
 
-function iniciarSesion() {
+function verificarUsuario() {
   let nomUsuario = document.getElementById("nomUsuario").value;
   let contrasena = document.getElementById("contrasena").value;
 
@@ -654,7 +653,7 @@ function iniciarSesion() {
 
 /* */
 
-function loguear(nomUsuario) {
+function iniciarSesion(nomUsuario) {
   logueado = 1;
   localStorage.setItem("logueado", 1);
   localStorage.setItem("nomUsuario", nomUsuario);
@@ -688,8 +687,8 @@ function crearBotonCerrarSesion() {
 //
 //                             --- INICIALIZACIÓN ---
 
-/* Se inicializan las variables principales y se cargan el stock y los usuarios de la "base de datos".
-Se verifica si hay algún usuario logueado; de ser así, se creael objeto "cliente" y se recupera su carrito. */
+/* Se inicializan las variables globales y se cargan el stock y los usuarios de la "base de datos".
+Se verifica si hay algún usuario logueado; de ser así, se crea el objeto "cliente" y se recupera su carrito. */
 
 let usuarios;
 let stock;
@@ -719,7 +718,7 @@ if (logueado == "1") {
 // ------------------------------------------------------------------------------------------------------
 
 //
-/*          Buscar pokemon */
+/*          Buscar Pokémon */
 
 /* Genera un número aleatorio de 1 a 1009   */
 
